@@ -17,6 +17,10 @@ dict_receive = {'message_type': '', 'sender_msg': '', 'sender_name': '', 'sender
                 'sender_belongs_to_the_group': '',
                 'sender_belongs_to_the_group_id': ''}
 # ---------------------------------------------------------------------------------------------------
+# 获取群的ID与名称，为了实现多群喊话做准备
+group_id_list = []
+group_name_list = []
+# ---------------------------------------------------------------------------------------------------
 or_msg_1 = subprocess.Popen(["go-cqhttp_windows_amd64.exe"], stdout=subprocess.PIPE)  # 拦截cmd输出
 or_msg_2 = ""  # 存放获取到的消息
 # ---------------------------------------------------------------------------------------------------36
@@ -297,7 +301,26 @@ class answer_logic():  # 回复逻辑
         msg = str(ans_msg['answer'])
         return msg
 
+# ---------------------------------------------------------------------------------------------------
+class receive_messages(Send_operation):  # 多群喊话中转站，因为启动喊话程序需要等待主人发送消息所以便需要循环等待消息发送
+    def receive_(self):
 
+        while True:
+            # 提示准备接收消息
+            Send_operation().Send_msg_answer()
+
+            Listener_processing().main_Listener_processing()
+            # 输出获取到的需要喊话的内容
+            word = dict_receive['sender_msg']  # 获取要发送的消息
+            # print(word)
+            if word == '接收消息中......' or word == '':
+                pass
+            else:
+                Send_operation().Send_msg_answer()
+                return word
+
+
+# ---------------------------------------------------------------------------------------------------
 
 def ee():
     global ccm
@@ -305,6 +328,7 @@ def ee():
         pass
     else:
         answer_logic().get_answer()
+
         Send_operation().Send_msg_answer()
 
 
@@ -314,7 +338,4 @@ if __name__ == '__main__':
         sun_2 = threading.Thread(target=ee())
         sun_1.start()
         sun_2.start()
-
-
-
-
+        sun_2.join()
