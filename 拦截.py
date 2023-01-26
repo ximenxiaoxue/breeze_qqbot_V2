@@ -2,12 +2,12 @@ import subprocess  # 拦截cmd输出使用的库
 import re  # 使用正则匹配消息
 import threading  # 多线程加快运行速度
 import time
-
 import requests  # 进行消息回答的获取以及回复
 import pandas as pd  # 准备实现本地词库
 from api import news_api  # 实现新闻
 from api import music_api  # 实现点歌
 from api import api_group_1  # 实现每日一言等
+from bs4 import BeautifulSoup
 # ---------------------------------------------------------------------------------------------------
 time_run_1 = time.time()
 # ---------------------------------------------------------------------------------------------------
@@ -272,11 +272,11 @@ class answer_logic():  # 回复逻辑
     def get_API_answer_3(self):
         global jdm
         if jdm == False:
-            urls = "http://api.qingyunke.com/api.php?key=free&appid=0&msg={}".format(dict_receive['sender_msg'])
-            answer_get = requests.get(url=urls).json()
-            answer_content = answer_get["content"]  # 获取API回答的内容
-            # print('>>>:' * 3 + "回答：" + answer_content)  # 检察是否可以正常运行
-            msg = answer_content
+            urls = "https://v.api.aa1.cn/api/api-xiaoai/talk.php?msg={}".format(dict_receive['sender_msg'])
+            answer_get = requests.get(url=urls).text
+            soup = BeautifulSoup(answer_get,"lxml")
+            line = soup.select("body p")
+            msg = line[0].string
             ans_msg['answer'] = msg
             # return msg
         else:
